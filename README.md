@@ -19,13 +19,20 @@ Proposed downloads:
 
 Approve? [Y]es / [n]o / [s]elect / numbers like '1,3' [y]:
 
-[1/1] Taylor Swift - Anti-Hero (Official Music Video)  (mp3, best)
-  ████████████████████ 100.0%  1.2 MiB/s  ETA --  4.1MiB
+Queue · 3 item(s)
+  queue: ░░░░░░░░░░░░░░░░░░░░░░░░ 0/3 ·   0.0%
+
+[1/3] Taylor Swift - Anti-Hero  (mp3, best)
+  queue ▓▓▓▓▓▓▓░░░░░░░░░░░░░  1/3 · 33.3%
+  item  ████████████████████ 100.0%  1.2 MiB/s  ETA --  4.1MiB
 ✓ saved: ~/Downloads/Mindown/Taylor Swift - Anti-Hero ....mp3
   tagging…
 ✓ tagged · Taylor Swift — Anti-Hero +lyrics +©
+  queue: ████████░░░░░░░░░░░░░░░░ 1/3 ·  33.3%
 
-mindown queued 1 of 1.
+[2/3] ...
+
+mindown queued 3 of 3.
 ```
 
 ## Requirements

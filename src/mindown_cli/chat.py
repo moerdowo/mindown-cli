@@ -72,6 +72,17 @@ def _parse_proposed_items(args_json: str) -> List[ProposedItem]:
     return out
 
 
+def _print_queue_status(done: int, total: int) -> None:
+    """One-line queue progress, printed after each item completes."""
+    if total <= 0:
+        return
+    frac = done / total
+    bar = ui.progress_bar(frac, width=24)
+    pct_str = f"{frac * 100:5.1f}%"
+    print(f"  {ui.dim('queue:')} {ui.cyan(bar)} "
+          f"{ui.bold(f'{done}/{total}')} {ui.dim(f'· {pct_str}')}")
+
+
 def _print_proposal(items: List[ProposedItem]) -> None:
     print()
     print(ui.bold("Proposed downloads:"))
@@ -130,16 +141,27 @@ def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = F
     approved = [i for i, d in zip(items, decisions) if d]
 
     if approved:
+        total = len(approved)
+        print()
+        print(ui.bold(f"Queue · {total} item(s)"))
+        _print_queue_status(0, total)
         print()
         for idx, item in enumerate(approved, start=1):
             fmt = parse_format(item.fmt)
             qual = parse_quality(item.quality, audio=is_audio(fmt))
             label = item.title or item.url
-            print(f"{ui.bold(f'[{idx}/{len(approved)}]')} {label}  "
+            print(f"{ui.bold(f'[{idx}/{total}]')} {label}  "
                   f"{ui.dim(f'({fmt}, {qual.label})')}")
-            result = run_download(cfg, item.url, fmt, qual, label=label)
+            result = run_download(
+                cfg, item.url, fmt, qual,
+                label=label,
+                queue_index=idx,
+                queue_total=total,
+            )
             if not result.ok:
                 ui.error(result.error or "download failed")
+                _print_queue_status(idx, total)
+                print()
                 continue
             ui.success(f"saved: {result.output_path}")
             if is_audio(fmt):
@@ -150,6 +172,7 @@ def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = F
                     ui.success(er.message)
                 else:
                     ui.warn(f"tag skipped — {er.message}")
+            _print_queue_status(idx, total)
             print()
 
     report = {

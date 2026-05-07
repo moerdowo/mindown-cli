@@ -73,32 +73,63 @@ def _build_args(
 
 
 class _ProgressBar:
-    """Single-line progress bar that redraws on a TTY, falls back to lines."""
+    """Two-line progress display that redraws on a TTY:
 
-    def __init__(self, label: str):
+      queue ▓▓▓░░░░░░░░░░░░░░░░░  2/4
+      item  ████░░░░░░░░░░░░░░░░ 25.0%  1.2 MiB/s  ETA 00:08  4.5MiB
+
+    On non-TTY output we stay silent — yt-dlp's own newline output is
+    already piping through `run_download`.
+    """
+
+    def __init__(self, label: str, queue_index: int = 1, queue_total: int = 1):
         self.label = label
+        self.qi = max(1, queue_index)
+        self.qt = max(1, queue_total)
         self.tty = sys.stdout.isatty()
-        self.last_pct = -1.0
+        self.lines_drawn = 0
+        self.last_item_pct = 0.0
 
-    def update(self, pct: float, speed: str, eta: str, total: str) -> None:
-        if not self.tty:
-            return
-        width = max(20, ui.term_width(80) - 50)
-        filled = int(round(pct * width))
-        bar = "█" * filled + "░" * (width - filled)
-        line = (
-            f"\r  {bar} {pct * 100:5.1f}%  "
+    def _render(self, item_pct: float, speed: str, eta: str, total: str) -> tuple[str, str]:
+        bar_width = 20
+        item_bar = ui.progress_bar(item_pct, width=bar_width)
+        # Queue fraction = fully completed items + fractional progress on current.
+        completed = self.qi - 1
+        queue_frac = (completed + item_pct) / self.qt
+        queue_bar = ui.progress_bar(queue_frac, width=bar_width)
+
+        queue_line = (
+            f"  {ui.dim('queue')} {ui.cyan(queue_bar)} "
+            f"{ui.bold(f'{self.qi}/{self.qt}')} "
+            f"{ui.dim(f'· {queue_frac * 100:4.1f}%')}"
+        )
+        item_line = (
+            f"  {ui.dim('item ')} {ui.green(item_bar)} "
+            f"{item_pct * 100:5.1f}%  "
             f"{ui.dim(speed or '—')}  "
             f"ETA {ui.dim(eta or '—')}  "
             f"{ui.dim(total or '')}"
         )
-        # truncate to terminal width to avoid wrap
+
+        # Hard-truncate so we don't wrap and break the overwrite trick.
         max_w = ui.term_width(120)
-        if len(line) > max_w:
-            line = line[:max_w]
-        sys.stdout.write(line)
+        if len(queue_line) > max_w:
+            queue_line = queue_line[:max_w]
+        if len(item_line) > max_w:
+            item_line = item_line[:max_w]
+        return queue_line, item_line
+
+    def update(self, pct: float, speed: str, eta: str, total: str) -> None:
+        if not self.tty:
+            return
+        self.last_item_pct = pct
+        queue_line, item_line = self._render(pct, speed, eta, total)
+        if self.lines_drawn:
+            # Cursor sits at end of the last drawn line; move up to the top of the block.
+            sys.stdout.write(f"\033[{self.lines_drawn - 1}A\r")
+        sys.stdout.write(f"\033[2K{queue_line}\n\033[2K{item_line}")
         sys.stdout.flush()
-        self.last_pct = pct
+        self.lines_drawn = 2
 
     def finish(self) -> None:
         if self.tty:
@@ -117,7 +148,15 @@ def _parse_percent(s: str) -> Optional[float]:
     return max(0.0, min(1.0, v / 100.0))
 
 
-def run_download(cfg: Config, url: str, fmt: str, quality: Quality, label: str) -> DownloadResult:
+def run_download(
+    cfg: Config,
+    url: str,
+    fmt: str,
+    quality: Quality,
+    label: str,
+    queue_index: int = 1,
+    queue_total: int = 1,
+) -> DownloadResult:
     if not cfg.yt_dlp_path or not os.access(cfg.yt_dlp_path, os.X_OK):
         return DownloadResult(ok=False, error="yt-dlp not found — run /config")
 
@@ -139,7 +178,7 @@ def run_download(cfg: Config, url: str, fmt: str, quality: Quality, label: str) 
         env=env,
     )
 
-    bar = _ProgressBar(label=label)
+    bar = _ProgressBar(label=label, queue_index=queue_index, queue_total=queue_total)
     title = ""
     output_path = ""
     last_line = ""

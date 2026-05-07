@@ -60,6 +60,13 @@ def term_width(default: int = 80) -> int:
         return default
 
 
+def progress_bar(frac: float, width: int = 20, fill: str = "█", empty: str = "░") -> str:
+    """Render a unicode-block progress bar at the given fraction (0..1)."""
+    frac = max(0.0, min(1.0, frac))
+    filled = int(round(frac * width))
+    return fill * filled + empty * (width - filled)
+
+
 # Block-letter "MINDOWN" + tagline. Width ~62 cols, fits any normal terminal.
 _BANNER = r"""
 ███╗   ███╗██╗███╗   ██╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
