@@ -118,9 +118,10 @@ def _handle_command(cfg: Config, session: ChatSession, line: str) -> bool:
     return True
 
 
-def _repl(cfg: Config, auto_approve: bool = False) -> None:
+def _repl(cfg: Config, auto_approve: bool = False, show_banner: bool = True) -> None:
     session = ChatSession(cfg, auto_approve=auto_approve)
-    ui.print_banner(f"model: {cfg.model}  ·  dir: {cfg.download_dir}")
+    if show_banner:
+        ui.print_banner(f"model: {cfg.model}  ·  dir: {cfg.download_dir}")
     if auto_approve:
         print(ui.yellow("  auto-approve ON — every AI proposal will download immediately"))
     print(ui.dim("  type a song/video request, or /help for commands. /quit to exit."))
@@ -186,7 +187,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--no-banner", action="store_true",
-        help="suppress the ASCII art banner",
+        help="suppress the ASCII art banner in the interactive REPL",
     )
     args = parser.parse_args(argv)
 
@@ -201,12 +202,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.prompt is not None:
-        if not args.no_banner:
-            ui.print_banner("non-interactive mode · auto-approve ON")
         return _run_oneshot(cfg, args.prompt)
 
     try:
-        _repl(cfg, auto_approve=args.yes)
+        _repl(cfg, auto_approve=args.yes, show_banner=not args.no_banner)
     except KeyboardInterrupt:
         print()
     return 0

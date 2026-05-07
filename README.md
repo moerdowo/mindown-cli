@@ -127,6 +127,9 @@ mindown -p "top 5 radiohead songs"
 mindown --prompt "bohemian rhapsody music video as mp4 1080p"
 ```
 
+The banner is only shown in interactive mode — `--prompt` runs are
+banner-free out of the box, so they pipe cleanly into logs.
+
 Inside the interactive REPL, pass `-y` / `--yes` to skip every approval
 prompt while still keeping the chat:
 
@@ -134,7 +137,7 @@ prompt while still keeping the chat:
 mindown -y
 ```
 
-Suppress the banner with `--no-banner` (e.g. when piping to a log).
+Suppress the REPL banner with `--no-banner` if you prefer.
 
 ## Notes
 
