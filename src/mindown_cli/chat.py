@@ -72,19 +72,29 @@ def _parse_proposed_items(args_json: str) -> List[ProposedItem]:
     return out
 
 
-def _ask_decisions(items: List[ProposedItem]) -> List[bool]:
-    """Show the proposal and collect a per-item approve/reject vector."""
+def _print_proposal(items: List[ProposedItem]) -> None:
     print()
     print(ui.bold("Proposed downloads:"))
     for i, it in enumerate(items, start=1):
-        head = f"  [{i}] {ui.bold(it.title)}"
-        meta = f"      {it.fmt} / {it.quality}"
-        print(head)
-        print(ui.dim(meta))
+        print(f"  [{i}] {ui.bold(it.title)}")
+        print(ui.dim(f"      {it.fmt} / {it.quality}"))
         if it.note:
             print(ui.dim(f"      {it.note}"))
         print(ui.dim(f"      {it.url}"))
     print()
+
+
+def _ask_decisions(items: List[ProposedItem], auto_approve: bool = False) -> List[bool]:
+    """Show the proposal and collect a per-item approve/reject vector.
+
+    When `auto_approve` is True we skip the prompt entirely and accept every
+    item — used by `--yes` / `--prompt` non-interactive runs.
+    """
+    _print_proposal(items)
+
+    if auto_approve:
+        ui.info(f"auto-approving {len(items)} item(s)")
+        return [True] * len(items)
 
     while True:
         choice = ui.prompt(
@@ -111,12 +121,12 @@ def _ask_decisions(items: List[ProposedItem]) -> List[bool]:
         ui.warn("didn't understand — type y, n, s, or item numbers like '1,3'")
 
 
-def _run_proposal(cfg: Config, items: List[ProposedItem]) -> str:
+def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = False) -> str:
     """Show approval UI, run approved downloads sequentially, return JSON for the model."""
     if not items:
         return json.dumps({"error": "propose_downloads called with empty items"})
 
-    decisions = _ask_decisions(items)
+    decisions = _ask_decisions(items, auto_approve=auto_approve)
     approved = [i for i, d in zip(items, decisions) if d]
 
     if approved:
@@ -153,7 +163,7 @@ def _run_proposal(cfg: Config, items: List[ProposedItem]) -> str:
     return json.dumps(report, ensure_ascii=False)
 
 
-def _execute_tool(cfg: Config, call: ToolCall) -> str:
+def _execute_tool(cfg: Config, call: ToolCall, auto_approve: bool = False) -> str:
     if call.name == "search_youtube":
         try:
             args = json.loads(call.arguments or "{}")
@@ -166,14 +176,15 @@ def _execute_tool(cfg: Config, call: ToolCall) -> str:
 
     if call.name == "propose_downloads":
         items = _parse_proposed_items(call.arguments)
-        return _run_proposal(cfg, items)
+        return _run_proposal(cfg, items, auto_approve=auto_approve)
 
     return json.dumps({"error": f"unknown tool: {call.name}"})
 
 
 class ChatSession:
-    def __init__(self, cfg: Config):
+    def __init__(self, cfg: Config, auto_approve: bool = False):
         self.cfg = cfg
+        self.auto_approve = auto_approve
         self.transcript: List[Dict[str, Any]] = []
 
     def reset(self) -> None:
@@ -213,7 +224,7 @@ class ChatSession:
                 return
 
             for tc in choice.tool_calls:
-                result = _execute_tool(self.cfg, tc)
+                result = _execute_tool(self.cfg, tc, auto_approve=self.auto_approve)
                 self.transcript.append({
                     "role": "tool",
                     "tool_call_id": tc.id,

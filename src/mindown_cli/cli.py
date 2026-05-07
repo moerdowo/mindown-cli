@@ -118,12 +118,12 @@ def _handle_command(cfg: Config, session: ChatSession, line: str) -> bool:
     return True
 
 
-def _repl(cfg: Config) -> None:
-    session = ChatSession(cfg)
-    print()
-    print(ui.bold("Mindown CLI") +
-          ui.dim(f"  · model: {cfg.model}  · dir: {cfg.download_dir}"))
-    print(ui.dim("Type a song/video request, or /help for commands. /quit to exit."))
+def _repl(cfg: Config, auto_approve: bool = False) -> None:
+    session = ChatSession(cfg, auto_approve=auto_approve)
+    ui.print_banner(f"model: {cfg.model}  ·  dir: {cfg.download_dir}")
+    if auto_approve:
+        print(ui.yellow("  auto-approve ON — every AI proposal will download immediately"))
+    print(ui.dim("  type a song/video request, or /help for commands. /quit to exit."))
     print()
     while True:
         try:
@@ -148,6 +148,18 @@ def _repl(cfg: Config) -> None:
             ui.warn("interrupted")
 
 
+def _run_oneshot(cfg: Config, prompt_text: str) -> int:
+    """Non-interactive: send `prompt_text`, auto-approve every proposal, exit."""
+    session = ChatSession(cfg, auto_approve=True)
+    try:
+        session.send(prompt_text)
+    except KeyboardInterrupt:
+        print()
+        ui.warn("interrupted")
+        return 130
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="mindown",
@@ -161,6 +173,21 @@ def main(argv: list[str] | None = None) -> int:
         "--show", action="store_true",
         help="print stored config and exit",
     )
+    parser.add_argument(
+        "-p", "--prompt", metavar="TEXT", default=None,
+        help=(
+            "non-interactive mode: send TEXT to the assistant once, "
+            "auto-approve every download it proposes, then exit"
+        ),
+    )
+    parser.add_argument(
+        "-y", "--yes", action="store_true",
+        help="auto-approve every proposed download (interactive REPL too)",
+    )
+    parser.add_argument(
+        "--no-banner", action="store_true",
+        help="suppress the ASCII art banner",
+    )
     args = parser.parse_args(argv)
 
     if args.show:
@@ -173,8 +200,13 @@ def main(argv: list[str] | None = None) -> int:
         ui.error("API key is required. Run `mindown --config` to set up.")
         return 1
 
+    if args.prompt is not None:
+        if not args.no_banner:
+            ui.print_banner("non-interactive mode · auto-approve ON")
+        return _run_oneshot(cfg, args.prompt)
+
     try:
-        _repl(cfg)
+        _repl(cfg, auto_approve=args.yes)
     except KeyboardInterrupt:
         print()
     return 0

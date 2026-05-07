@@ -115,6 +115,27 @@ holds the API key. Re-run setup with `mindown --config`.
 › daft punk - around the world as wav
 ```
 
+## Non-interactive / scripted use
+
+Pass a single prompt with `-p` / `--prompt` and the CLI runs once,
+auto-approves every download the AI proposes, and exits — no REPL, no
+approval prompts. Handy for cron, pipelines, or one-off scripts.
+
+```bash
+mindown -p "anti-hero by taylor swift as mp3"
+mindown -p "top 5 radiohead songs"
+mindown --prompt "bohemian rhapsody music video as mp4 1080p"
+```
+
+Inside the interactive REPL, pass `-y` / `--yes` to skip every approval
+prompt while still keeping the chat:
+
+```bash
+mindown -y
+```
+
+Suppress the banner with `--no-banner` (e.g. when piping to a log).
+
 ## Notes
 
 - Audio defaults to MP3 best quality. Video defaults to MP4 1080p when

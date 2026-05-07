@@ -58,3 +58,29 @@ def term_width(default: int = 80) -> int:
         return shutil.get_terminal_size((default, 20)).columns
     except OSError:
         return default
+
+
+# Block-letter "MINDOWN" + tagline. Width ~62 cols, fits any normal terminal.
+_BANNER = r"""
+███╗   ███╗██╗███╗   ██╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
+████╗ ████║██║████╗  ██║██╔══██╗██╔═══██╗██║    ██║████╗  ██║
+██╔████╔██║██║██╔██╗ ██║██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
+██║╚██╔╝██║██║██║╚██╗██║██║  ██║██║   ██║██║███╗██║██║╚██╗██║
+██║ ╚═╝ ██║██║██║ ╚████║██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
+╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
+"""
+
+
+def banner(subtitle: str = "") -> str:
+    """Return the ASCII banner, colorized when stdout is a TTY."""
+    art = _BANNER.rstrip("\n")
+    art = cyan(art) if _USE_COLOR else art
+    tag = "  cli · ai-driven yt-dlp + ffmpeg downloader"
+    if subtitle:
+        tag = f"  {subtitle}"
+    tag = dim(tag) if _USE_COLOR else tag
+    return f"{art}\n{tag}\n"
+
+
+def print_banner(subtitle: str = "") -> None:
+    print(banner(subtitle))
