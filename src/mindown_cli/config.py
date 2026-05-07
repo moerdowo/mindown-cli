@@ -114,12 +114,26 @@ def first_run_setup() -> Config:
         default=cfg.download_dir or _default_download_dir(),
     )
 
+    print()
+    print(ui.dim(
+        "Lyrics: LRCLib (free, no auth) is always tried first. If it has no\n"
+        "match, mindown can ask the configured chat model for lyrics as a\n"
+        "fallback. Off by default — incurs extra API tokens and some models\n"
+        "refuse on copyright grounds."
+    ))
+    ai_lyrics_default = "y" if cfg.ai_lyrics_fallback else "n"
+    ai_lyrics_ans = ui.prompt(
+        "Enable AI lyrics fallback? [y/N]",
+        default=ai_lyrics_default,
+    ).lower()
+
     cfg.api_key = api_key
     cfg.base_url = base_url.rstrip("/")
     cfg.model = model
     cfg.yt_dlp_path = yt
     cfg.ffmpeg_path = ff
     cfg.download_dir = str(Path(download_dir).expanduser())
+    cfg.ai_lyrics_fallback = ai_lyrics_ans in ("y", "yes", "true", "1", "on")
     Path(cfg.download_dir).mkdir(parents=True, exist_ok=True)
 
     path = cfg.save()

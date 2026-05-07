@@ -189,6 +189,18 @@ def main(argv: list[str] | None = None) -> int:
         "--no-banner", action="store_true",
         help="suppress the ASCII art banner in the interactive REPL",
     )
+    lyrics_group = parser.add_mutually_exclusive_group()
+    lyrics_group.add_argument(
+        "--ai-lyrics", dest="ai_lyrics", action="store_true", default=None,
+        help=(
+            "use the configured chat model to fetch lyrics when LRCLib "
+            "has no match (overrides the saved config for this run)"
+        ),
+    )
+    lyrics_group.add_argument(
+        "--no-ai-lyrics", dest="ai_lyrics", action="store_false",
+        help="force-disable the AI lyrics fallback for this run",
+    )
     args = parser.parse_args(argv)
 
     if args.show:
@@ -200,6 +212,10 @@ def main(argv: list[str] | None = None) -> int:
     if not cfg.is_configured:
         ui.error("API key is required. Run `mindown --config` to set up.")
         return 1
+
+    # Per-run override; doesn't touch the saved config.
+    if args.ai_lyrics is not None:
+        cfg.ai_lyrics_fallback = args.ai_lyrics
 
     if args.prompt is not None:
         return _run_oneshot(cfg, args.prompt)

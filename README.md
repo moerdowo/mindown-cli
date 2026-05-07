@@ -95,8 +95,12 @@ holds the API key. Re-run setup with `mindown --config`.
    - iTunes Search API → title, artist, album, year, genre, track #, cover
      art (1200×1200), composer, copyright (via album lookup).
    - LRCLib → plain-text lyrics (USLT / `©lyr`).
-   - Optional AI fallback for lyrics (off by default; enable with
-     `/ailyrics on`).
+   - Optional **AI lyrics fallback** — when LRCLib has no match, ask
+     the configured chat model for the lyrics and write them into the
+     same USLT / `©lyr` field. Off by default; opt in during first-run
+     setup, with `/ailyrics on` in the REPL, or `--ai-lyrics` on the
+     command line. Some models refuse on copyright grounds, in which
+     case nothing is written.
    - `ffmpeg` rewrites the file in place with ID3v2.3 / iTunes atoms.
 
 ## Slash commands
@@ -132,6 +136,7 @@ approval prompts. Handy for cron, pipelines, or one-off scripts.
 mindown -p "anti-hero by taylor swift as mp3"
 mindown -p "top 5 radiohead songs"
 mindown --prompt "bohemian rhapsody music video as mp4 1080p"
+mindown --ai-lyrics -p "blackbird by the beatles as mp3"   # use AI for lyrics
 ```
 
 The banner is only shown in interactive mode — `--prompt` runs are
