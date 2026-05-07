@@ -89,15 +89,6 @@ holds the API key. Re-run setup with `mindown --config`.
 /quit              exit
 ```
 
-## Examples
-
-```
-› anti-hero by taylor swift as mp3
-› bohemian rhapsody music video as mp4 1080p
-› top 5 radiohead songs
-› daft punk - around the world as wav
-```
-
 ## Non-interactive / scripted use
 
 Pass a single prompt with `-p` / `--prompt` and the CLI runs once,
