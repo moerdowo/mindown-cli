@@ -5,6 +5,8 @@ an OpenAI-compatible model to find and download songs / videos via `yt-dlp`,
 with automatic ID3 / iTunes-atom tagging (cover art + LRCLib lyrics) on every
 audio file.
 
+![mindown-cli preview](docs/preview.png)
+
 ```
 $ mindown
 › anti-hero by taylor swift as mp3
