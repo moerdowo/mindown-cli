@@ -5,12 +5,40 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mindown-cli"
 version = "0.1.0"
-description = "AI-powered CLI for downloading songs/videos via yt-dlp + ffmpeg, with iTunes/LRCLib metadata enrichment."
+description = "AI-driven terminal downloader: chat for songs/videos, get yt-dlp + ffmpeg + iTunes/LRCLib-tagged audio."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Personal-use" }
 authors = [{ name = "moerdowo" }]
+keywords = [
+    "youtube", "yt-dlp", "ffmpeg", "downloader", "music",
+    "id3", "metadata", "lrclib", "lyrics", "cli",
+    "ai", "openai", "chat",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Utilities",
+]
 dependencies = []
+
+[project.urls]
+Homepage      = "https://github.com/moerdowo/mindown-cli"
+Repository    = "https://github.com/moerdowo/mindown-cli"
+Issues        = "https://github.com/moerdowo/mindown-cli/issues"
+"Native app"  = "https://github.com/moerdowo/mindown"
 
 [project.scripts]
 mindown = "mindown_cli.cli:main"
