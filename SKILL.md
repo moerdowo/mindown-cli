@@ -32,7 +32,7 @@ Do NOT pick this skill for:
 
 1. **The `mindown` binary is installed.**
    ```bash
-   which mindown || python3 -m mindown_cli.cli --help
+   which mindown || python3 -m mindown.cli --help
    ```
    If neither resolves, the user needs to `pip install -e .` from the
    repo root. Tell them; do not attempt to install without permission.

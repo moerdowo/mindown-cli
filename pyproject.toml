@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mindown-cli"
+name = "mindown"
 version = "0.1.0"
 description = "AI-driven terminal downloader: chat for songs/videos, get yt-dlp + ffmpeg + iTunes/LRCLib-tagged audio."
 readme = "README.md"
@@ -41,7 +41,7 @@ Issues        = "https://github.com/moerdowo/mindown-cli/issues"
 "Native app"  = "https://github.com/moerdowo/mindown"
 
 [project.scripts]
-mindown = "mindown_cli.cli:main"
+mindown = "mindown.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
