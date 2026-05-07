@@ -91,71 +91,12 @@ holds the API key. Re-run setup with `mindown --config`.
 
 ## Use with AI agents
 
-This repo ships a [`SKILL.md`](SKILL.md) that briefs AI agents on how
-to drive `mindown` autonomously — prerequisites, the
-`mindown -p "..."` invocation pattern, intent → flag mapping
-(`--first`, `--ai-lyrics`, …), output parsing, failure modes, and
-safety rules ("never run `mindown --config` from an agent").
+Just ask your AI agent:
 
-### Claude Code
+> install this skill: https://github.com/moerdowo/mindown-cli/blob/main/SKILL.md
 
-User-level (available in every session, on any project):
-
-```bash
-mkdir -p ~/.claude/skills/mindown-cli
-ln -s "$PWD/SKILL.md" ~/.claude/skills/mindown-cli/SKILL.md
-```
-
-(Use `cp` instead of `ln -s` if you'd rather pin a snapshot.)
-
-Project-level (only loads when Claude Code runs inside a specific
-repo — useful if you want the skill scoped to one workspace):
-
-```bash
-cd /path/to/your/project
-mkdir -p .claude/skills/mindown-cli
-ln -s /absolute/path/to/mindown-cli/SKILL.md .claude/skills/mindown-cli/SKILL.md
-```
-
-Restart Claude Code (or run `/skills` to refresh) and the agent will
-pick up the skill on its next prompt-router pass. You can verify
-it's loaded with `/skills` — `mindown-cli` should appear in the list.
-
-### Cursor / Continue / other agentic IDEs
-
-Most agentic IDEs honour the same `.claude/skills/<name>/SKILL.md`
-convention; some additionally read `.cursor/rules/` or similar. Check
-your IDE's docs and either symlink or copy `SKILL.md` into the right
-directory.
-
-### Claude Agent SDK / custom agents
-
-`SKILL.md` is plain Markdown with YAML frontmatter. Load it into the
-agent's system prompt or pass it as a tool spec — the `description`
-field in the frontmatter is the trigger string the routing layer
-matches against, and the body is the operating manual the agent
-follows once activated.
-
-```python
-from pathlib import Path
-skill = Path("SKILL.md").read_text()
-# include `skill` in your system prompt or skill registry
-```
-
-### Verifying the agent can drive it
-
-```bash
-# Pre-flight: skill prereqs
-mindown --show           # config exists?
-which yt-dlp ffmpeg      # binaries on PATH?
-
-# Sanity test the agent's primary call shape
-mindown --first -p "<song title> by <artist>"
-```
-
-If both pre-flight checks pass, agents reading `SKILL.md` should be
-able to run `mindown -p "..."` invocations end-to-end without further
-hand-holding.
+The agent will fetch the skill file and figure out where to put it for
+its own runtime.
 
 ## Notes
 
