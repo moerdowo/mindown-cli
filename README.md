@@ -25,12 +25,33 @@ brew install yt-dlp ffmpeg
 
 ## Install
 
+From [PyPI](https://pypi.org/project/mindown/) — pick whichever fits
+your workflow:
+
 ```bash
+pipx install mindown        # recommended (isolated env)
+uv tool install mindown     # if you use uv
+pip install mindown         # plain pip
+```
+
+Or run it without installing:
+
+```bash
+uvx mindown                 # one-off via uv
+pipx run mindown            # one-off via pipx
+```
+
+From source (e.g. while hacking on it):
+
+```bash
+git clone https://github.com/moerdowo/mindown-cli
+cd mindown-cli
 pip install -e .
 ```
 
-This installs a `mindown` command. The package is pure stdlib — no extra
-Python deps are required.
+All variants install a `mindown` command. The package is pure stdlib —
+no Python deps are pulled in beyond yt-dlp / ffmpeg, which you install
+through your system package manager (see Requirements above).
 
 ## First run
 
