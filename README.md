@@ -137,7 +137,13 @@ mindown -p "anti-hero by taylor swift as mp3"
 mindown -p "top 5 radiohead songs"
 mindown --prompt "bohemian rhapsody music video as mp4 1080p"
 mindown --ai-lyrics -p "blackbird by the beatles as mp3"   # use AI for lyrics
+mindown --first -p "blinding lights"                       # only 1 song
 ```
+
+Add `--first` to any of these to keep just the first item the model
+proposes from each turn and skip the rest. Useful when you want a
+prompt like `"blinding lights"` to resolve to exactly one download
+even if the model gathered candidates.
 
 The banner is only shown in interactive mode — `--prompt` runs are
 banner-free out of the box, so they pipe cleanly into logs.

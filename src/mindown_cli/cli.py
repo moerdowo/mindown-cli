@@ -118,10 +118,17 @@ def _handle_command(cfg: Config, session: ChatSession, line: str) -> bool:
     return True
 
 
-def _repl(cfg: Config, auto_approve: bool = False, show_banner: bool = True) -> None:
-    session = ChatSession(cfg, auto_approve=auto_approve)
+def _repl(
+    cfg: Config,
+    auto_approve: bool = False,
+    show_banner: bool = True,
+    first_only: bool = False,
+) -> None:
+    session = ChatSession(cfg, auto_approve=auto_approve, first_only=first_only)
     if show_banner:
         ui.print_banner(f"model: {cfg.model}  ·  dir: {cfg.download_dir}")
+    if first_only:
+        print(ui.yellow("  --first ON — only the first proposed item from each turn is kept"))
     if auto_approve:
         print(ui.yellow("  auto-approve ON — every AI proposal will download immediately"))
     print(ui.dim("  type a song/video request, or /help for commands. /quit to exit."))
@@ -149,9 +156,9 @@ def _repl(cfg: Config, auto_approve: bool = False, show_banner: bool = True) -> 
             ui.warn("interrupted")
 
 
-def _run_oneshot(cfg: Config, prompt_text: str) -> int:
+def _run_oneshot(cfg: Config, prompt_text: str, first_only: bool = False) -> int:
     """Non-interactive: send `prompt_text`, auto-approve every proposal, exit."""
-    session = ChatSession(cfg, auto_approve=True)
+    session = ChatSession(cfg, auto_approve=True, first_only=first_only)
     try:
         session.send(prompt_text)
     except KeyboardInterrupt:
@@ -186,6 +193,14 @@ def main(argv: list[str] | None = None) -> int:
         help="auto-approve every proposed download (interactive REPL too)",
     )
     parser.add_argument(
+        "--first", action="store_true",
+        help=(
+            "download only the first proposed item from each turn — "
+            "intended for non-interactive `--prompt` runs that should "
+            "yield exactly one song/video"
+        ),
+    )
+    parser.add_argument(
         "--no-banner", action="store_true",
         help="suppress the ASCII art banner in the interactive REPL",
     )
@@ -218,10 +233,15 @@ def main(argv: list[str] | None = None) -> int:
         cfg.ai_lyrics_fallback = args.ai_lyrics
 
     if args.prompt is not None:
-        return _run_oneshot(cfg, args.prompt)
+        return _run_oneshot(cfg, args.prompt, first_only=args.first)
 
     try:
-        _repl(cfg, auto_approve=args.yes, show_banner=not args.no_banner)
+        _repl(
+            cfg,
+            auto_approve=args.yes,
+            show_banner=not args.no_banner,
+            first_only=args.first,
+        )
     except KeyboardInterrupt:
         print()
     return 0
