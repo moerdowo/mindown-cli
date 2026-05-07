@@ -31,11 +31,13 @@ Workflow:
    your knowledge of the artist's catalogue to pick titles, then call \
    search_youtube once per title.
 3. After collecting candidates, call propose_downloads with the chosen \
-   items. The user must approve before anything is queued.
+   items. The user must approve before anything is downloaded.
 4. Default to MP3 audio at "best" quality. Use video (MP4 1080p) only \
    if the user explicitly asks for video / a music video.
-5. Reply briefly. Once propose_downloads returns, give a one-line \
-   summary like "queued 3 of 5".
+5. propose_downloads returns AFTER the approved items have already \
+   been downloaded — its result includes `downloaded_count`, \
+   `failed_count`, and `rejected_count`. Reply with a one-line \
+   summary like "downloaded 3 of 5" (mention failures if any).
 
 Allowed formats: mp3, m4a, opus, wav (audio); mp4, webm, mkv (video).
 Allowed qualities: best, 2160p, 1440p, 1080p, 720p, 480p, 360p \
@@ -140,6 +142,14 @@ def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = F
     decisions = _ask_decisions(items, auto_approve=auto_approve)
     approved = [i for i, d in zip(items, decisions) if d]
 
+    # Track per-item outcome so the model can summarize accurately.
+    outcomes: Dict[str, Dict[str, Any]] = {
+        item.url: {"title": item.title, "approved": False, "downloaded": False, "error": ""}
+        for item in items
+    }
+    for item, d in zip(items, decisions):
+        outcomes[item.url]["approved"] = bool(d)
+
     if approved:
         total = len(approved)
         print()
@@ -160,9 +170,11 @@ def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = F
             )
             if not result.ok:
                 ui.error(result.error or "download failed")
+                outcomes[item.url]["error"] = result.error or "download failed"
                 _print_queue_status(idx, total)
                 print()
                 continue
+            outcomes[item.url]["downloaded"] = True
             ui.success(f"saved: {result.output_path}")
             if is_audio(fmt):
                 title_for_lookup = result.title or item.title
@@ -175,12 +187,22 @@ def _run_proposal(cfg: Config, items: List[ProposedItem], auto_approve: bool = F
             _print_queue_status(idx, total)
             print()
 
+    downloaded = sum(1 for o in outcomes.values() if o["downloaded"])
+    failed = sum(1 for o in outcomes.values() if o["approved"] and not o["downloaded"])
+    rejected = sum(1 for o in outcomes.values() if not o["approved"])
+
     report = {
-        "approved_count": sum(1 for d in decisions if d),
-        "rejected_count": sum(1 for d in decisions if not d),
+        "downloaded_count": downloaded,
+        "failed_count": failed,
+        "rejected_count": rejected,
         "items": [
-            {"title": item.title, "approved": bool(d)}
-            for item, d in zip(items, decisions)
+            {
+                "title": o["title"],
+                "approved": o["approved"],
+                "downloaded": o["downloaded"],
+                **({"error": o["error"]} if o["error"] else {}),
+            }
+            for o in outcomes.values()
         ],
     }
     return json.dumps(report, ensure_ascii=False)
