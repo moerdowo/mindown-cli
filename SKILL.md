@@ -34,8 +34,16 @@ Do NOT pick this skill for:
    ```bash
    which mindown || python3 -m mindown.cli --help
    ```
-   If neither resolves, the user needs to `pip install -e .` from the
-   repo root. Tell them; do not attempt to install without permission.
+   If neither resolves, the package is on PyPI as
+   [`mindown`](https://pypi.org/project/mindown/) — tell the user to
+   pick whichever fits their workflow:
+   ```bash
+   pipx install mindown      # recommended (isolated env)
+   uv tool install mindown   # if they use uv
+   pip install mindown       # plain pip
+   ```
+   Or run it without installing: `uvx mindown` / `pipx run mindown`.
+   Do NOT install on the user's behalf without permission.
 
 2. **`yt-dlp` and `ffmpeg` are on PATH.**
    ```bash
