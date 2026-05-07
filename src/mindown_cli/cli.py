@@ -30,9 +30,9 @@ Slash commands:
   /quit, /exit     exit
 
 Anything else is sent to the AI assistant. Try things like:
-  anti-hero by taylor swift as mp3
-  top 5 radiohead songs
-  bohemian rhapsody music video as mp4 1080p
+  <song title> by <artist> as mp3
+  top 5 songs from <artist>
+  <song> music video as mp4 1080p
 """
 
 

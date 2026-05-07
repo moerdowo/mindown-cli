@@ -89,37 +89,6 @@ holds the API key. Re-run setup with `mindown --config`.
 /quit              exit
 ```
 
-## Non-interactive / scripted use
-
-Pass a single prompt with `-p` / `--prompt` and the CLI runs once,
-auto-approves every download the AI proposes, and exits — no REPL, no
-approval prompts. Handy for cron, pipelines, or one-off scripts.
-
-```bash
-mindown -p "anti-hero by taylor swift as mp3"
-mindown -p "top 5 radiohead songs"
-mindown --prompt "bohemian rhapsody music video as mp4 1080p"
-mindown --ai-lyrics -p "blackbird by the beatles as mp3"   # use AI for lyrics
-mindown --first -p "blinding lights"                       # only 1 song
-```
-
-Add `--first` to any of these to keep just the first item the model
-proposes from each turn and skip the rest. Useful when you want a
-prompt like `"blinding lights"` to resolve to exactly one download
-even if the model gathered candidates.
-
-The banner is only shown in interactive mode — `--prompt` runs are
-banner-free out of the box, so they pipe cleanly into logs.
-
-Inside the interactive REPL, pass `-y` / `--yes` to skip every approval
-prompt while still keeping the chat:
-
-```bash
-mindown -y
-```
-
-Suppress the REPL banner with `--no-banner` if you prefer.
-
 ## Use with AI agents
 
 This repo ships a [`SKILL.md`](SKILL.md) that briefs AI agents on how
@@ -181,7 +150,7 @@ mindown --show           # config exists?
 which yt-dlp ffmpeg      # binaries on PATH?
 
 # Sanity test the agent's primary call shape
-mindown --first -p "anti-hero by taylor swift"
+mindown --first -p "<song title> by <artist>"
 ```
 
 If both pre-flight checks pass, agents reading `SKILL.md` should be

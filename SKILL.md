@@ -79,7 +79,7 @@ There is no banner in `--prompt` mode, so output pipes cleanly.
 | Flag | What it does | When to use it |
 |---|---|---|
 | `-p TEXT`, `--prompt TEXT` | One-shot non-interactive run — REQUIRED for agent use | Always |
-| `--first` | Keep only the first proposed item from each turn | When the user wants exactly one song / video, even if their phrasing is ambiguous ("download blinding lights") |
+| `--first` | Keep only the first proposed item from each turn | When the user wants exactly one song / video, even if their phrasing is ambiguous (e.g. they only give a song title with no artist) |
 | `--ai-lyrics` | Use the chat model as a lyrics fallback when LRCLib has no match | When the user explicitly asks for lyrics and accepts the extra API cost |
 | `--no-ai-lyrics` | Force-disable AI lyrics for this run | When the user wants only verified (LRCLib) lyrics |
 | `-y`, `--yes` | Auto-approve in REPL mode (no effect with `-p`, which already auto-approves) | Rarely; agents should prefer `-p` |
@@ -106,20 +106,20 @@ the model is the planner. Do not over-edit their prompt.
 
 ```bash
 # Single song, audio
-mindown --first -p "anti-hero by taylor swift as mp3"
+mindown --first -p "<song> by <artist> as mp3"
 
 # Music video
-mindown --first -p "bohemian rhapsody music video as mp4 1080p"
+mindown --first -p "<song> music video as mp4 1080p"
 
 # Multiple songs (no --first)
-mindown -p "top 5 radiohead songs"
+mindown -p "top 5 songs from <artist>"
 
 # With AI lyrics fallback
-mindown --first --ai-lyrics -p "blackbird by the beatles as mp3"
+mindown --first --ai-lyrics -p "<song> by <artist> as mp3"
 
 # Different audio container / quality
-mindown --first -p "around the world by daft punk as wav"
-mindown --first -p "in the lonely hour by sam smith as m4a 256"
+mindown --first -p "<song> by <artist> as wav"
+mindown --first -p "<song> by <artist> as m4a 256"
 ```
 
 ## What gets created

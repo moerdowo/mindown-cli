@@ -25,8 +25,8 @@ DEFINITIONS: List[Dict[str, Any]] = [
                     "query": {
                         "type": "string",
                         "description": (
-                            'Search query, e.g. "Taylor Swift Anti-Hero '
-                            'official audio".'
+                            "Search query — typically '<artist> <song title> "
+                            "official audio' or similar."
                         ),
                     },
                     "limit": {
