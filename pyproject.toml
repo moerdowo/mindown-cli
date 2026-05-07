@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mindown-cli"
+version = "0.1.0"
+description = "AI-powered CLI for downloading songs/videos via yt-dlp + ffmpeg, with iTunes/LRCLib metadata enrichment."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Personal-use" }
+authors = [{ name = "moerdowo" }]
+dependencies = []
+
+[project.scripts]
+mindown = "mindown_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
